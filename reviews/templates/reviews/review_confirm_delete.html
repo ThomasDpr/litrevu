@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer la critique - LITReview{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white  p-4 md:p-8">
+    <div class="max-w-2xl mx-auto bg-white  rounded-lg shadow-md border border-red-500  overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-red-600  mb-6">Supprimer la critique</h1>
+            
+            <div class="space-y-4 mb-6">
+                <h2 class="text-xl font-semibold">{{ review.headline }}</h2>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium">Note : </span>
+                    <div class="flex items-center">
+                        <span class="mr-1">{{ review.rating }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 fill-current" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="ml-1">/5</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 ">{{ review.body }}</p>
+                <p class="text-sm text-gray-500 ">
+                    Critique du ticket "{{ review.ticket.title }}"
+                    publiée le {{ review.time_created|date:"d/m/Y" }}
+                </p>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4   " role="alert">
+                    <div class="flex">
+                        <div class="py-1">
+                            <svg class="fill-current h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            Êtes-vous sûr de vouloir supprimer cette critique ? Cette action est irréversible.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    {{ form.confirm }}
+                    <label for="{{ form.confirm.id_for_label }}" class="text-sm font-medium text-gray-700 ">
+                        {{ form.confirm.label }}
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'home' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500    -600">
+                        Annuler
+                    </a>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500  -600">
+                        Supprimer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

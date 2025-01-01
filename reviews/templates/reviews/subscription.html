@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Subscription Management - LITReview{% endblock %}
+{% block content %}
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8">Gestion des Abonnements</h1>
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Trouver des utilisateurs à suivre</h2>
+            <form method="post" class="flex gap-4">
+                {% csrf_token %}
+                <input type="text"
+                       name="username"
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black"
+                       placeholder="Entrez un nom d'utilisateur"
+                       required>
+                <button type="submit"
+                        class="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                        </path>
+                    </svg>
+                    Suivre
+                </button>
+            </form>
+        </div>
+        <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button onclick="showTab('following')"
+                    class="tab-btn flex-1 py-2 px-4 rounded-md transition-all"
+                    data-tab="following">
+                Abonnements ({{ following|length }})
+            </button>
+            <button onclick="showTab('followers')"
+                    class="tab-btn flex-1 py-2 px-4 rounded-md transition-all"
+                    data-tab="followers">
+                Abonnés ({{ followers|length }})
+            </button>
+            <button onclick="showTab('blocked')"
+                    class="tab-btn flex-1 py-2 px-4 rounded-md transition-all"
+                    data-tab="blocked">
+                Bloqués ({{ blocked_users|length }})
+            </button>
+        </div>
+        <div id="following" class="tab-content space-y-4">
+            {% for follow in following %}
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+                        <div>
+                            <h3 class="font-medium">{{ follow.followed_user.username }}</h3>
+                            <p class="text-sm text-gray-500">
+                                {{ follow.followed_user.ticket_set.count }} tickets
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <form method="post"
+                              action="{% url 'reviews:unfollow' follow.followed_user.id %}">
+                            {% csrf_token %}
+                            <button class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Ne plus suivre
+                            </button>
+                        </form>
+                        <form method="post"
+                              action="{% url 'reviews:block_user' follow.followed_user.id %}">
+                            {% csrf_token %}
+                            <button class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600">
+                                Bloquer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-gray-500 py-8">Vous ne suivez encore personne.</p>
+            {% endfor %}
+        </div>
+        <div id="followers" class="tab-content space-y-4 hidden">
+            {% for follower in followers %}
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+                        <div>
+                            <h3 class="font-medium">{{ follower.user.username }}</h3>
+                            <p class="text-sm text-gray-500">
+                                {{ follower.user.ticket_set.count }} tickets
+                            </p>
+                        </div>
+                    </div>
+                    <form method="post"
+                          action="{% url 'reviews:block_user' follower.user.id %}">
+                        {% csrf_token %}
+                        <button class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600">
+                            Bloquer
+                        </button>
+                    </form>
+                </div>
+            {% empty %}
+                <p class="text-center text-gray-500 py-8">Personne ne vous suit encore.</p>
+            {% endfor %}
+        </div>
+        <div id="blocked" class="tab-content space-y-4 hidden">
+            {% for blocked in blocked_users %}
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+                        <div>
+                            <h3 class="font-medium">{{ blocked.blocked_user.username }}</h3>
+                        </div>
+                    </div>
+                    <form method="post"
+                          action="{% url 'reviews:unblock_user' blocked.blocked_user.id %}">
+                        {% csrf_token %}
+                        <button class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Débloquer
+                        </button>
+                    </form>
+                </div>
+            {% empty %}
+                <p class="text-center text-gray-500 py-8">
+                    Vous n'avez bloqué aucun utilisateur.
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+function showTab(tabName) {
+   
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+    
+   
+    document.getElementById(tabName).classList.remove('hidden');
+    
+   
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('bg-white', 'shadow-sm');
+        } else {
+            btn.classList.remove('bg-white', 'shadow-sm');
+        }
+    });
+    
+   
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    window.history.pushState({}, '', url);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab') || 'following';
+    showTab(activeTab);
+});
+    </script>
+{% endblock %}

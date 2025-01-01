@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - LITReview{% endblock %}
+{% load lucide %}
+{% block content %}
+    <div class="max-w-2xl mx-auto max-h-[calc(100vh-4rem)] py-4">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 ">
+                <h3 class="text-3xl font-bold leading-none tracking-tight">{{ title }}</h3>
+                <p class="text-sm text-muted-foreground">
+                    Partagez votre avis sur un livre ou un article avec la communauté
+                </p>
+            </div>
+            <div class="p-6 pt-0">
+                <form method="post"
+                      enctype="multipart/form-data"
+                      class="flex flex-col gap-8">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="rounded-lg border p-4 text-xs text-red-500 bg-red-50 border-red-500"
+                             role="alert">
+                            Veuillez corriger les erreurs ci-dessous.
+                        </div>
+                    {% endif %}
+                    <div class="space-y-2">
+                        <label for="{{ form.title.id_for_label }}"
+                               class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Titre
+                        </label>
+                        <div class="space-y-1">
+                            <input type="text"
+                                   name="{{ form.title.name }}"
+                                   id="{{ form.title.id_for_label }}"
+                                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                   placeholder="Titre du livre/article"
+                                   {% if form.title.value %}value="{{ form.title.value }}"{% endif %}>
+                            {% if form.title.errors %}
+                                <p class="text-xs font-medium text-red-500">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.description.id_for_label }}"
+                               class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Description
+                        </label>
+                        <div class="space-y-1">
+                            <textarea name="{{ form.description.name }}"
+                                      id="{{ form.description.id_for_label }}"
+                                      class="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                                      placeholder="Description du livre/article">{% if form.description.value %}{{ form.description.value }}{% endif %}</textarea>
+                            {% if form.description.errors %}
+                                <p class="text-sm font-medium text-red-500">{{ form.description.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.image.id_for_label }}"
+                               class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Image de couverture
+                        </label>
+                        <div class="space-y-1">
+                            <label for="{{ form.image.id_for_label }}" class="block cursor-pointer">
+                                <div class="border-2 border-dashed rounded-lg p-6 transition-colors border-gray-300 hover:border-black">
+                                    <div id="upload-placeholder"
+                                         {% if ticket and ticket.image %}class="hidden"{% endif %}>
+                                        {% lucide "upload" size=48 %}
+                                        <div class="mt-4 flex text-sm leading-6 text-gray-600">
+                                            <span class="relative rounded-md bg-white font-semibold text-primary hover:text-primary/80">
+                                                Télécharger un fichier
+                                            </span>
+                                            <p class="pl-1">ou glisser-déposer</p>
+                                        </div>
+                                        <p class="text-xs leading-5 text-gray-600">PNG, JPG, GIF jusqu'à 10MB</p>
+                                    </div>
+                                    <div id="image-preview"
+                                         class="{% if not ticket.image %}hidden{% endif %} relative aspect-video">
+                                        <img src="{% if ticket.image %}{{ ticket.image.url }}{% endif %}"
+                                             alt="Aperçu"
+                                             class="rounded-md object-cover w-full h-full">
+                                        <div class="absolute top-2 right-2 flex gap-2">
+                                            <button type="button"
+                                                    class="inline-flex items-center justify-center rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                                                    onclick="replaceImage(event)"
+                                                    title="Remplacer l'image">
+                                                {% lucide "replace" size=20 %}
+                                            </button>
+                                            <button type="button"
+                                                    class="inline-flex items-center justify-center rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-destructive hover:text-destructive-foreground h-9 w-9"
+                                                    onclick="removeImage(event)"
+                                                    title="Supprimer l'image">
+                                                {% lucide "trash-2" size=20 %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="file"
+                                   name="{{ form.image.name }}"
+                                   id="{{ form.image.id_for_label }}"
+                                   class="sr-only"
+                                   accept="image/png, image/jpeg, image/gif"
+                                   {% if ticket.image %}data-current-image="{{ ticket.image.url }}"{% endif %}>
+                            <input type="hidden" name="image_changed" id="image_changed" value="false">
+                        </div>
+                        {% if form.image.errors %}
+                            <p class="text-sm font-medium text-red-500">{{ form.image.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-end gap-4 p-4">
+                        <a href="{% url 'home' %}"
+                           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                            Annuler
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+      function previewImage(event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          const imagePreview = document.getElementById('image-preview');
+          const uploadPlaceholder = document.getElementById('upload-placeholder');
+          const previewImage = imagePreview.querySelector('img');
+          document.getElementById('image_changed').value = 'true';
+  
+          reader.onload = function(e) {
+              previewImage.src = e.target.result;
+              uploadPlaceholder.classList.add('hidden');
+              imagePreview.classList.remove('hidden');
+          }
+  
+          if (file) {
+              reader.readAsDataURL(file);
+          }
+      }
+  
+      function replaceImage(event) {
+          event.preventDefault();
+          document.getElementById('{{ form.image.id_for_label }}').click();
+      }
+  
+      function removeImage(event) {
+          event.preventDefault();
+          const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+          const imagePreview = document.getElementById('image-preview');
+          const uploadPlaceholder = document.getElementById('upload-placeholder');
+          const previewImage = imagePreview.querySelector('img');
+          document.getElementById('image_changed').value = 'true';
+  
+          fileInput.value = '';
+          previewImage.src = '';
+          uploadPlaceholder.classList.remove('hidden');
+          imagePreview.classList.add('hidden');
+      }
+
+
+      document.getElementById('{{ form.image.id_for_label }}').addEventListener('change', previewImage);
+    </script>
+{% endblock %}

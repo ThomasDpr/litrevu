@@ -1,0 +1,34 @@
+{% load lucide %}
+
+<div class="h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+    <div class="bg-white rounded-md shadow-lg p-12 text-center max-w-2xl w-full border">
+
+        <div class="mb-12 flex justify-center">
+            {% lucide "file-text" size=80 class="text-gray-900" %}
+        </div>
+
+        <h2 class="text-3xl font-semibold mb-4 text-gray-900">
+            Aucun post pour le moment
+        </h2>
+        <p class="text-gray-500 mb-12 max-w-md mx-auto">
+            Commencez à partager vos avis en créant des tickets ou des critiques. Vos contributions apparaîtront ici.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <a href="{% url 'reviews:ticket_create' %}"
+               class="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition duration-300 ease-in-out flex items-center justify-center">
+                {% lucide "book-open" size=20 class="mr-2" %}
+                Publier un ticket
+            </a>
+            <a href="{% url 'reviews:create_ticket_and_review' %}"
+               class="w-full sm:w-auto px-6 py-3 border border-gray-900 text-gray-900 rounded-md hover:bg-gray-50 transition duration-300 ease-in-out flex items-center justify-center">
+                {% lucide "pen-line" size=20 class="mr-2" %}
+                Écrire une critique
+            </a>
+        </div>
+
+        <p class="text-sm text-gray-500">
+            Partagez et échangez avec la communauté
+        </p>
+    </div>
+</div>

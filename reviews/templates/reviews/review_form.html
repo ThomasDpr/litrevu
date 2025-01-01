@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - LITReview{% endblock %}
+{% load lucide %}
+{% block content %}
+    <div class="max-w-2xl mx-auto py-4">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-3xl font-bold leading-none tracking-tight">{{ title }}</h3>
+                <p class="text-sm text-muted-foreground">{{ subtitle }}</p>
+            </div>
+            <div class="p-6 pt-0">
+                {% if ticket %}
+                    <div class="mb-8 p-6 rounded-lg border bg-muted/50">
+                        <h2 class="text-xl font-semibold mb-2">{{ ticket.title }}</h2>
+                        <p class="text-sm text-muted-foreground mb-4">{{ ticket.description }}</p>
+                        {% if ticket.image %}
+                            <div class="relative aspect-video mb-4">
+                                <img src="{{ ticket.image.url }}"
+                                     alt="Image du ticket"
+                                     class="rounded-md object-cover w-full h-full">
+                            </div>
+                        {% endif %}
+                        <p class="text-sm text-muted-foreground">
+                            Demandé par {{ ticket.user.username }} le {{ ticket.time_created|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                {% endif %}
+                <form method="post" class="space-y-8">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="rounded-lg border p-4 text-sm text-destructive" role="alert">
+                            Veuillez corriger les erreurs ci-dessous.
+                        </div>
+                    {% endif %}
+                    <div class="space-y-2">
+                        <label for="{{ form.headline.id_for_label }}"
+                               class="text-sm font-medium leading-none">
+                            Titre
+                        </label>
+                        <input type="text"
+                               name="{{ form.headline.name }}"
+                               id="{{ form.headline.id_for_label }}"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                               placeholder="Un titre accrocheur pour votre critique"
+                               {% if form.headline.value %}value="{{ form.headline.value }}"{% endif %}>
+                        {% if form.headline.errors %}
+                            <p class="text-sm font-medium text-destructive">
+                                {{ form.headline.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium leading-none">Note</label>
+                        <div class="flex gap-4">
+                            {% with ''|center:6 as range %}
+                                {% for _ in range %}
+                                    <div class="relative">
+                                        <input type="radio"
+                                               name="{{ form.rating.name }}"
+                                               id="rating-{{ forloop.counter0 }}"
+                                               value="{{ forloop.counter0 }}"
+                                               class="peer sr-only"
+                                               {% if form.rating.value == forloop.counter0 %}checked{% endif %}
+                                               onchange="handleRatingChange(this)">
+                                        <label for="rating-{{ forloop.counter0 }}"
+                                               class="flex flex-col items-center p-4 bg-background border rounded-lg cursor-pointer hover:border-primary transition-colors peer-checked:border-primary peer-checked:bg-accent/50">
+                                            {% lucide "star" class="h-6 w-6 star-icon" %}
+                                            <span class="mt-2 text-sm font-medium">{{ forloop.counter0 }}</span>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                        {% if form.rating.errors %}
+                            <p class="text-sm font-medium text-destructive">{{ form.rating.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.body.id_for_label }}"
+                               class="text-sm font-medium leading-none">
+                            Commentaire
+                        </label>
+                        <textarea name="{{ form.body.name }}"
+                                  id="{{ form.body.id_for_label }}"
+                                  class="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                                  placeholder="Partagez votre avis détaillé...">{% if form.body.value %}{{ form.body.value }}{% endif %}</textarea>
+                        {% if form.body.errors %}
+                            <p class="text-sm font-medium text-destructive">{{ form.body.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex justify-end gap-4">
+                        <a href="{% url 'home' %}"
+                           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                            Annuler
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                            Publier
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  function handleRatingChange(radio) {
+    const value = parseInt(radio.value);
+    const stars = document.querySelectorAll('.star-icon');
+    
+    stars.forEach((star, index) => {
+      if (index <= value) {
+        star.classList.add('text-yellow-400', 'fill-yellow-400');
+      } else {
+        star.classList.remove('text-yellow-400', 'fill-yellow-400');
+      }
+    });
+  }
+
+  window.handleRatingChange = handleRatingChange;
+
+  // Initialiser les étoiles   si une note est déjà sélectionnée
+  const selectedRating = document.querySelector('input[name="{{ form.rating.name }}"]:checked');
+  if (selectedRating) {
+    handleRatingChange(selectedRating);
+  }
+});
+    </script>
+{% endblock %}

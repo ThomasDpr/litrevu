@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - LITReview{% endblock %}
+{% load lucide %}
+{% block content %}
+    <div class="py-4">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="text-3xl font-bold leading-none tracking-tight">
+                    Créer une critique
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                    Partagez votre avis détaillé sur un livre ou un article
+                </p>
+            </div>
+            <div class="p-6 pt-0">
+                <form method="post"
+                      enctype="multipart/form-data"
+                      class="flex flex-col gap-8">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                {% lucide "book" size=20 %}
+                                <h2 class="text-lg font-semibold">Livre/Article</h2>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="{{ ticket_form.title.id_for_label }}"
+                                   class="text-sm font-medium leading-none">
+                                Titre
+                            </label>
+                            <input type="text"
+                                   name="{{ ticket_form.title.name }}"
+                                   id="{{ ticket_form.title.id_for_label }}"
+                                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                   placeholder="Titre du livre/article">
+                            {% if ticket_form.title.errors %}
+                                <p class="text-sm font-medium text-destructive">
+                                    {{ ticket_form.title.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="space-y-2">
+                            <label for="{{ ticket_form.description.id_for_label }}"
+                                   class="text-sm font-medium leading-none">
+                                Description
+                            </label>
+                            <textarea name="{{ ticket_form.description.name }}"
+                                      id="{{ ticket_form.description.id_for_label }}"
+                                      class="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                                      placeholder="Description du livre/article"></textarea>
+                            {% if ticket_form.description.errors %}
+                                <p class="text-sm font-medium text-destructive">
+                                    {{ ticket_form.description.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none">Image de couverture</label>
+                            <div class="space-y-1">
+                                <label for="{{ ticket_form.image.id_for_label }}"
+                                       class="block cursor-pointer">
+                                    <div class="border-2 border-dashed rounded-lg p-6 transition-colors border-gray-300 hover:border-black"
+                                         id="drop-zone">
+                                        <div class="flex flex-col items-center" id="upload-placeholder">
+                                            {% lucide "upload" size=48 %}
+                                            <div class="mt-4 flex text-sm leading-6 text-gray-600">
+                                                <span class="relative rounded-md bg-white font-semibold text-primary hover:text-primary/80">
+                                                    Télécharger un fichier
+                                                </span>
+                                                <p class="pl-1">ou glisser-déposer</p>
+                                            </div>
+                                            <p class="text-xs leading-5 text-gray-600">PNG, JPG, GIF jusqu'à 10MB</p>
+                                        </div>
+                                        <div class="hidden relative aspect-video" id="image-preview">
+                                            <img src="" alt="Aperçu" class="rounded-md object-cover w-full h-full">
+                                            <div class="absolute top-2 right-2 flex gap-2">
+                                                <button type="button"
+                                                        class="inline-flex items-center justify-center rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                                                        onclick="replaceImage(event)"
+                                                        title="Remplacer l'image">
+                                                    {% lucide "replace" size=20 %}
+                                                </button>
+                                                <button type="button"
+                                                        class="inline-flex items-center justify-center rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-destructive hover:text-destructive-foreground h-9 w-9"
+                                                        onclick="removeImage(event)"
+                                                        title="Supprimer l'image">
+                                                    {% lucide "trash-2" size=20 %}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <input type="file"
+                                       name="{{ ticket_form.image.name }}"
+                                       id="{{ ticket_form.image.id_for_label }}"
+                                       class="sr-only"
+                                       accept="image/*">
+                            </div>
+                            {% if ticket_form.image.errors %}
+                                <p class="text-sm font-medium text-destructive">
+                                    {{ ticket_form.image.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="w-full h-px  bg-gray-200"></div>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            {% lucide "message-square-text" size=20 %}
+                            <h2 class="text-lg font-semibold">Critique</h2>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="{{ review_form.headline.id_for_label }}"
+                                   class="text-sm font-medium leading-none">
+                                Titre de la critique
+                            </label>
+                            <input type="text"
+                                   name="{{ review_form.headline.name }}"
+                                   id="{{ review_form.headline.id_for_label }}"
+                                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                   placeholder="Un titre accrocheur pour votre critique">
+                            {% if review_form.headline.errors %}
+                                <p class="text-sm font-medium text-destructive">
+                                    {{ review_form.headline.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none">Note</label>
+                            <div class="flex gap-4">
+                                {% with ''|center:6 as range %}
+                                    {% for _ in range %}
+                                        <div class="relative">
+                                            <input type="radio"
+                                                   name="{{ review_form.rating.name }}"
+                                                   id="rating-{{ forloop.counter0 }}"
+                                                   value="{{ forloop.counter0 }}"
+                                                   class="peer sr-only"
+                                                   onchange="handleRatingChange(this)">
+                                            <label for="rating-{{ forloop.counter0 }}"
+                                                   class="flex flex-col items-center p-4 bg-background border rounded-lg cursor-pointer hover:border-primary transition-colors peer-checked:border-primary peer-checked:bg-accent/50">
+                                                {% lucide "star" class="h-6 w-6 star-icon" %}
+                                                <span class="mt-2 text-sm font-medium">{{ forloop.counter0 }}</span>
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="{{ review_form.body.id_for_label }}"
+                                   class="text-sm font-medium leading-none">
+                                Votre critique
+                            </label>
+                            <textarea name="{{ review_form.body.name }}"
+                                      id="{{ review_form.body.id_for_label }}"
+                                      class="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                                      placeholder="Partagez votre avis détaillé..."></textarea>
+                            {% if review_form.body.errors %}
+                                <p class="text-sm font-medium text-destructive">
+                                    {{ review_form.body.errors.0 }}
+                                </p>
+                            {% endif %}
+                            <p class="text-sm text-muted-foreground">
+                                Exprimez votre opinion de manière constructive
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-4">
+                        <a href="{% url 'home' %}"
+                           class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                            Annuler
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                            Publier
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('{{ ticket_form.image.id_for_label }}');
+      const imagePreview = document.getElementById('image-preview');
+      const uploadPlaceholder = document.getElementById('upload-placeholder');
+      const previewImage = imagePreview.querySelector('img');
+    
+      
+      function handleRatingChange(radio) {
+        const value = parseInt(radio.value);
+        const stars = document.querySelectorAll('.star-icon');
+        
+        stars.forEach((star, index) => {
+          if (index <= value) {
+            star.classList.add('text-yellow-400', 'fill-yellow-400');
+          } else {
+            star.classList.remove('text-yellow-400', 'fill-yellow-400');
+          }
+        });
+      }
+    
+      
+      window.handleRatingChange = handleRatingChange;
+    
+      
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+    
+      
+      dropZone.addEventListener('drop', handleDrop, false);
+      
+      
+      fileInput.addEventListener('change', handleFileSelect, false);
+    
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const file = dt.files[0];
+        handleFile(file);
+      }
+    
+      function handleFileSelect(e) {
+        const file = e.target.files[0];
+        handleFile(file);
+      }
+    
+      function handleFile(file) {
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            uploadPlaceholder.classList.add('hidden');
+            imagePreview.classList.remove('hidden');
+          }
+          reader.readAsDataURL(file);
+        }
+      }
+    
+      
+      window.replaceImage = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileInput.click();
+      }
+    
+      window.removeImage = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileInput.value = '';
+        previewImage.src = '';
+        uploadPlaceholder.classList.remove('hidden');
+        imagePreview.classList.add('hidden');
+      }
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer le ticket - LITReview{% endblock %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto bg-white  rounded-lg shadow-md border border-red-500  overflow-hidden ">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-red-600  mb-6">Supprimer le ticket</h1>
+            
+            <div class="space-y-4 mb-6">
+                <h2 class="text-xl font-semibold">{{ ticket.title }}</h2>
+                <p class="text-gray-600 ">{{ ticket.description }}</p>
+                {% if ticket.image %}
+                <div class="relative aspect-video rounded-md overflow-hidden">
+                    <img src="{{ ticket.image.url }}" alt="Image du ticket" class="object-cover w-full h-full">
+                </div>
+                {% endif %}
+                <p class="text-sm text-gray-500 ">
+                    Ticket créé le {{ ticket.time_created|date:"d/m/Y" }}
+                </p>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4   " role="alert">
+                    <div class="flex items-center">
+                        <div class="py-1">
+                            <svg class="fill-current h-6 w-6 text-red-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible.
+                            {% if ticket.reviews.exists %}
+                            <br><strong>Attention :</strong> La suppression de ce ticket entraînera également la suppression de toutes les critiques associées.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    {{ form.confirm }}
+                    <label for="{{ form.confirm.id_for_label }}" class="text-sm font-medium text-gray-700 ">
+                        {{ form.confirm.label }}
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'home' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500    -600">
+                        Annuler
+                    </a>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500  -600">
+                        Supprimer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
