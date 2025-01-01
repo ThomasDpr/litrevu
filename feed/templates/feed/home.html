@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class=" flex w-full gap-20  justify-center items-center px-4 h-[calc(100vh-4rem)]">
+    <div class="w-1/2 flex flex-col justify-center">
+        <img src="{% static 'images/review.svg' %}" alt="Illustration de review" class="w-full">
+    </div>
+
+
+    <div class="w-1/2 ">
+        {% include 'feed/partials/login_form.html' %}
+    </div>
+</div>
+{% endblock %}

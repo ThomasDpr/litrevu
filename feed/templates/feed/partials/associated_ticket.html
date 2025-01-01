@@ -1,0 +1,37 @@
+{% load static %}
+{% load tz i18n %}
+<div class="mt-6 p-4 bg-gray-50 rounded-md border">
+    <div class="flex items-start space-x-4">
+        {% include 'feed/partials/avatar_placeholder.html' with username=item.post.user.username width='w-10' height='h-10' %}
+        <div class="flex-1">
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                    <p class="font-medium text-gray-900">{{ item.post.ticket.user.username }}</p>
+                    <p class="text-sm text-gray-500">Ticket</p>
+                </div>
+                <span class="self-end">
+                    {% if request.session.django_timezone == "Europe/Paris" %}
+                    {% language "fr" %}
+                    <time datetime="{{ item.post.time_created|date:'c' }}" class="text-sm text-gray-500">
+                        le {{ item.post.time_created|date:"d F à H\hi" }} 
+                    </time>
+                    {% endlanguage %}
+                {% else %}
+                    <time datetime="{{ item.post.time_created|date:'c' }}">
+                        {{ item.post.time_created|date:"H:i, d F Y" }}
+                    </time>
+                {% endif %}
+                
+                </span>
+            </div>
+            <h3 class="mt-2 font-medium">{{ item.post.ticket.title }}</h3>
+            {% if item.post.ticket.image %}
+                <div class="mt-4">
+                    <img src="{{ item.post.ticket.image.url }}"
+                         alt="Image du ticket"
+                         class="max-h-96 object-cover rounded-md">
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

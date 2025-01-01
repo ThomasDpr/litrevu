@@ -1,0 +1,10 @@
+{% load static %}
+<img src="{% static 'images/avatar_placeholder.png' %}"
+     alt="Avatar de {{ username }}"
+     class="{{ width }} {{ height }} rounded-full object-cover">
+{% comment %} 
+
+    Je tente de passer des variables (semblant à des props comme React/Vue).
+    Les variables 'width', 'height' et 'username' sont envoyé via la partial
+
+{% endcomment %}

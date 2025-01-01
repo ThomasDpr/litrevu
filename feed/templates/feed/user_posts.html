@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz i18n %}
+{% load lucide %}
+{% block title %}Vos posts - LITReview{% endblock %}
+{% block content %}
+    {% if posts %}
+        <div class="max-w-screen-sm mx-auto flex flex-col gap-4">
+            <h1 class="text-3xl font-bold text-center">Vos posts</h1>
+            <div class="flex flex-col gap-4">
+                {% for post in posts %}
+                    <div class="flex p-4 gap-4 border rounded-md shadow-sm">
+                        <div class="shrink-0">
+                            <img src="{% static 'images/avatar_placeholder.png' %}"
+                                 alt="Avatar"
+                                 class="size-8 rounded-full ">
+                        </div>
+                        <div class="flex flex-col gap-4 w-full">
+                            <div class="flex items-center w-full justify-between text-xs text-gray-500">
+                                <div class="flex gap-1 items-center ">
+                                    <span class="text-black font-bold text-sm">{{ post.post.user.username }}</span>
+                                    <span >·</span>
+                                    {% if request.session.django_timezone == "Europe/Paris" %}
+                                        {% language "fr" %}
+                                            <time datetime="{{ post.post.time_created|date:'c' }}"
+                                                  class="text-xs text-gray-500">
+                                                {{ post.post.time_created|date:"H:i, d F Y" }}
+                                            </time>
+                                        {% endlanguage %}
+                                    {% else %}
+                                        <time datetime="{{ post.post.time_created|date:'c' }}"
+                                              class="text-xs text-gray-500">
+                                            {{ post.post.time_created|date:"H:i, d F Y" }}
+                                        </time>
+                                    {% endif %}
+                                </div>
+                                {% if post.type == 'TICKET' %}
+                                    <div class="border rounded-md px-2 py-1 border-violet-500 text-violet-500 bg-violet-500/10 text-xs">
+                                        <span class="font-medium">Ticket publié</span>
+                                    </div>
+                                {% else %}
+                                    <div class="border rounded-md px-2 py-1 border-green-500 text-green-500 bg-green-500/10 text-xs">
+                                        <span class="font-medium">Critique publiée</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if post.type == 'TICKET' %}
+                                <div class="flex flex-col gap-4">
+                                    <h2 class="text-lg font-semibold">{{ post.post.title }}</h2>
+                                    <p class="text-sm">{{ post.post.description }}</p>
+                                    {% if post.post.image %}
+                                        <img src="{{ post.post.image.url }}"
+                                             alt="Image du ticket"
+                                             class="max-w-[50%] rounded-md border">
+                                    {% endif %}
+                                </div>
+                                <hr class="flex-grow border-t border-gray-300">
+                                <div class="flex items-center gap-4">
+                                    <a href="{% url 'reviews:ticket_edit' post.post.id %}"
+                                       class="flex items-center gap-2 text-gray-500 hover:text-black text-xs">
+                                        {% lucide "pencil" size=12 %}
+                                        Modifier
+                                    </a>
+                                    <a href="{% url 'reviews:ticket_delete' post.post.id %}"
+                                       class="flex items-center gap-2 text-gray-500 hover:text-black text-xs">
+                                        {% lucide "trash-2" size=12 %}
+                                        Supprimer
+                                    </a>
+                                </div>
+                                <hr class="flex-grow border-t border-gray-300">
+                                {% if post.reviews %}
+                                    {% for review in post.reviews %}
+                                        <div class="flex  space-x-4">
+                                            <img src="{% static 'images/avatar_placeholder.png' %}"
+                                                 alt="Avatar de {{ item.post.user.username }}"
+                                                 class="w-6 h-6 rounded-full object-cover">
+                                            <div class="reply-content">
+                                                <div>
+                                                    <span class="username">{{ review.user.username }}</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    {% for i in "12345" %}
+                                                        {% if forloop.counter <= review.rating %}
+                                                            {% lucide "star" size=16 class="text-yellow-500 fill-current" %}
+                                                        {% else %}
+                                                            {% lucide "star" size=16 class="text-gray-300" %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <h3>{{ review.headline }}</h3>
+                                                <p>{{ review.body }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% else %}
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-4">
+                                        <div class="flex items-center">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= post.post.rating %}
+                                                    {% lucide "star" size=16 class="text-yellow-500 fill-current" %}
+                                                {% else %}
+                                                    {% lucide "star" size=16 class="text-gray-300" %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <h2 class="text-lg font-semibold">{{ post.post.headline }}</h2>
+                                        <p class="text-sm">{{ post.post.body }}</p>
+                                    </div>
+                                    <hr class="flex-grow border-t border-gray-300">
+                                    <div class="rounded-md border p-4 flex flex-col gap-4">
+                                        <div class=" flex items-center space-x-2">
+                                            <img src="{% static 'images/avatar_placeholder.png' %}"
+                                                 alt="Avatar de {{ post.post.ticket.user.username }}"
+                                                 class="w-6 h-6 rounded-full object-cover">
+                                            <span class="username">{{ post.post.ticket.user.username }}</span>
+                                        </div>
+                                        <p class="text-lg font-semibold">{{ post.post.ticket.title }}</p>
+                                        <p class="text-sm">{{ post.post.ticket.description }}</p>
+                                        {% if post.post.ticket.image %}
+                                            <img src="{{ post.post.ticket.image.url }}"
+                                                 alt="Image du ticket"
+                                                 class="max-w-[50%] rounded-md border">
+                                        {% endif %}
+                                    </div>
+                                    <hr class="flex-grow border-t border-gray-300">
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <a href="{% url 'reviews:review_edit' post.post.id %}"
+                                       class="flex items-center gap-2 text-gray-500 hover:text-black text-xs">
+                                        {% lucide "pencil" size=12 %}
+                                        Modifier
+                                    </a>
+                                    <a href="{% url 'reviews:review_delete' post.post.id %}"
+                                       class="flex items-center gap-2 text-gray-500 hover:text-black text-xs">
+                                        {% lucide "trash-2" size=12 %}
+                                        Supprimer
+                                    </a>
+                                </div>
+                                <hr class="flex-grow border-t border-gray-300">
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        {% include 'reviews/partials/empty_posts.html' %}
+    {% endif %}
+
+{% endblock %}

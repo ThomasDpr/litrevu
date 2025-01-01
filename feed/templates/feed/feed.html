@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load lucide %}
+{% load tz i18n %}
+{% block title %}Flux - LITReview{% endblock %}
+{% block content %}
+    {% if posts %}
+        {% include 'feed/partials/buttons.html' %}
+    {% endif %}
+    <div>
+        {% for item in posts %}
+            {% if item.type == 'TICKET' %}
+                <div class="bg-white rounded-md shadow border p-6 mb-6 ">
+                   
+                    <div class="flex items-start space-x-4  ">
+                        {% include 'feed/partials/avatar_placeholder.html' with username=item.post.user.username width='w-12' height='h-12' %}
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    {% if item.post.user == user %}
+                                        <p class="font-medium text-gray-900">Vous</p>
+                                        <p class="text-sm text-gray-500">avez demandé une critique</p>
+                                    {% else %}
+                                        <p class="font-medium text-gray-900">{{ item.post.user.username }}</p>
+                                        <p class="text-sm text-gray-500">a demandé une critique</p>
+                                    {% endif %}
+                                </div>
+                                <span class="self-end">
+                                    {% if request.session.django_timezone == "Europe/Paris" %}
+                                        {% language "fr" %}
+                                            <time datetime="{{ item.post.time_created|date:'c' }}"
+                                                  class="text-sm text-gray-500">
+                                                le {{ item.post.time_created|date:"d F à H\hi" }}
+                                            </time>
+                                        {% endlanguage %}
+                                    {% else %}
+                                        <time datetime="{{ item.post.time_created|date:'c' }}">
+                                            {{ item.post.time_created|date:"H:i, d F Y" }}
+                                        </time>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-4 border-t border-gray-300">
+                   
+                    <div class="space-y-4 border rounded-md p-4  text-sm">
+                        <h2 class="text-xl font-semibold text-gray-900">{{ item.post.title }}</h2>
+                        <p class="text-gray-700">{{ item.post.description }}</p>
+                        {% if item.post.image %}
+                            <div class="">
+                                <img src="{{ item.post.image.url }}"
+                                     alt="Image du ticket"
+                                     class=" size-1/3 object-cover">
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if not item.has_review %}
+                        <div class="pt-4">
+                            <a href="{% url 'reviews:review_create' item.post.id %}"
+                               class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition duration-300 ease-in-out">
+                                {% lucide "pen-line" size=20 class="mr-2" %}
+                                Créer une critique
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="post review bg-white rounded-md shadow-md p-6 mb-6">
+                   
+                    <div class="flex items-start space-x-4 mb-6">
+                        {% include 'feed/partials/avatar_placeholder.html' with username=item.post.user.username width='w-12' height='h-12' %}
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    {% if item.post.user == user %}
+                                        <p class="font-medium text-gray-900">Vous</p>
+                                        <p class="text-sm text-gray-500">avez publié une critique</p>
+                                    {% else %}
+                                        <p class="font-medium text-gray-900">{{ item.post.user.username }}</p>
+                                        <p class="text-sm text-gray-500">a publié une critique</p>
+                                    {% endif %}
+                                </div>
+                                {% if request.session.django_timezone == "Europe/Paris" %}
+                                    {% language "fr" %}
+                                        <time datetime="{{ item.post.time_created|date:'c' }}"
+                                              class="text-sm text-gray-500">
+                                            {{ item.post.time_created|date:"H:i, d F Y" }}
+                                        </time>
+                                    {% endlanguage %}
+                                {% else %}
+                                    <time datetime="{{ item.post.time_created|date:'c' }}">
+                                        {{ item.post.time_created|date:"H:i, d F Y" }}
+                                    </time>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-semibold text-gray-900">{{ item.post.headline }}</h2>
+                        <div class="flex items-center">
+                            <div class="flex items-center">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= item.post.rating %}
+                                        {% lucide "star" size=16 class="text-yellow-500 fill-current" %}
+                                    {% else %}
+                                        {% lucide "star" size=16 class="text-gray-300" %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-gray-700">{{ item.post.body }}</p>
+                       
+                        {% include 'feed/partials/associated_ticket.html' %}
+                    </div>
+                </div>
+            {% endif %}
+        {% empty %}
+            {% include 'feed/partials/empty_state.html' %}
+        {% endfor %}
+    </div>
+{% endblock %}
