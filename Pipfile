@@ -5,6 +5,11 @@ name = "pypi"
 
 [packages]
 django = "*"
+pillow = "*"
+lucide = {extras = ["django"], version = "*"}
+djlint = "*"
+pytz = "*"
+black = "*"
 
 [dev-packages]
 
