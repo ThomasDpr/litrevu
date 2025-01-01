@@ -1,0 +1,43 @@
+{% load lucide %}
+
+<header class="flex justify-between items-center py-4 px-6 bg-white  sticky top-0 w-full  border-b border-neutral-200 z-50 h-16">
+    <div class="flex-1"></div>
+    <a href="{% url 'home' %}" class="flex items-center space-x-2 text-xl hover:opacity-80 ">
+        {% lucide "book-open" %}
+        <h1 class="font-semibold">LITReview</h1>
+    </a>
+    {% if user.is_authenticated %}
+        <nav class="flex-1 flex justify-end space-x-4 text-sm h-full ">
+            <a href="{% url 'home' %}"
+                class="flex items-center space-x-2 hover:opacity-80 text-gray-700 hover:text-black text-sm">
+                {% lucide "scroll-text" size=16 %}
+                <span>Flux</span>
+            </a>
+            <span class="border-l border-gray-300 h-full"></span> <!-- Séparateur vertical -->
+            <a href="{% url 'user_posts' %}"
+                class="flex items-center space-x-2 hover:opacity-80 text-gray-700 hover:text-black">
+                {% lucide "book-marked" size=16 %}
+                <span>Posts</span>
+            </a>
+            <span class="border-l border-gray-300 h-full"></span>
+            <a href="{% url 'reviews:subscriptions' %}"
+                class="flex items-center space-x-2 text-gray-700 hover:text-black">
+                {% lucide "users" size=16 %}
+                <span>Abonnements</span>
+            </a>
+            <span class="border-l border-gray-300 h-full"></span>
+            <form method="post"
+                action="{% url 'logout' %}"
+                class="text-gray-700 hover:text-black h-full">
+                {% csrf_token %}
+                <button type="submit"
+                        class="flex items-center h-full space-x-2 hover:opacity-80 text-gray-700 hover:text-black">
+                    {% lucide "log-out" size=16 %}
+                    <span>Se déconnecter</span>
+                </button>
+            </form>
+        </nav>
+    {% else %}
+        <div class="flex-1"></div>
+    {% endif %}
+</header>
