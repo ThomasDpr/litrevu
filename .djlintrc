@@ -1,0 +1,6 @@
+{
+    "indent": 4,
+    "profile": "django",
+    "max_line_length": 80,
+    "use_spaces": false
+}
